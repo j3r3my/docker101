@@ -1,0 +1,33 @@
+version: "3"
+
+services:
+  dotnetapp:
+    image: j3r3my/docker101:latest
+    container_name: "docker101"
+    ports:
+      - '8081:80'
+    labels:
+      - 'traefik.backend=dotnetapp'
+      - 'traefik.port=8081'
+      - 'traefik.frontend.rule=Host:frontend.localhost'
+
+  portainer:
+    image: portainer/portainer
+    container_name: "portainer"
+    command: --no-auth -H unix:///var/run/docker.sock
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+      - 'traefik.backend=portainer'
+      - 'traefik.port=9000'
+      - 'traefik.frontend.rule=Host:portainer.localhost'
+
+  traefik:
+    image: traefik
+    container_name: "traefik"
+    command: -c /dev/null --web --docker --logLevel=INFO
+    ports:
+      - '8000:80'
+      - '8080:8080' # Dashboard
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
